@@ -6,4 +6,4 @@ SCOPE=["User.Read","offline_access", "Mail.Read"]
 T_ENDPOINT="https://genpurpstrg.table.core.windows.net/"
 T_CONNECTION="DefaultEndpointsProtocol=https;AccountName=genpurpstrg;AccountKey=u5OeXo7nn+3RznW87vuNsInYRDbK9mtBdXL17uZDkESOCT6z7GBJHnILj8jy51H+kACHrrYebIt9cR2srCoH7Q==;EndpointSuffix=core.windows.net"
 ## change for Server
-REDIRECT_URI="http://localhost:5000/authcallback"
+REDIRECT_URI="https://mailscraper22.herokuapp.com"
