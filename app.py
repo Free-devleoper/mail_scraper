@@ -158,8 +158,8 @@ def get_url():
                         # return redirect("/?msg=User already exists")
         except Exception as e:
                 return "Status:Failed"+str(e)
-    #  else:
-    #     return redirect("/")
+     else:
+        return redirect("/")
 @app.route("/")
 def hello_world():
     return render_template('index.html')
