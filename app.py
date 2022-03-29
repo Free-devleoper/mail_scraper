@@ -1,11 +1,11 @@
 import os
 import re
 from traceback import print_tb
-from typing_extensions import Self
 from http import client
 from sqlite3 import connect
 from unittest import result
 from azure.data.tables import TableServiceClient
+from azure.data.tables import UpdateMode
 from urllib import response
 from flask import Flask,jsonify, redirect,request,make_response,render_template,current_app
 from flask_cors import CORS
@@ -21,16 +21,30 @@ app = Flask(__name__)
 CORS(app)
 client=Client(CLIENT_ID,CLIENT_SECRET,account_type='common')
 regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
+
+
+def get_table_client():
+    t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
+    table_client = t_client.get_table_client(table_name="mailscraperapi")
+    return table_client
+    
 def isValid(email):
     if re.fullmatch(regex, email):
       return True
     else:
         return False
+def update_user(user):
+    t_client=get_table_client()
+    db_user=t_client.get_entity(partition_key=user["PartitionKey"],row_key=user["RowKey"])  
+    db_user["access_token"]=user["access_token"]
+    db_user["refresh_token"]=user["refresh_token"]
+    db_user["refresh_token_date"]=datetime.now()
+    t_client.update_entity(mode=UpdateMode.REPLACE,entity=db_user)
+    return db_user
 def get_user_acount():
     res_user=client.users.get_me()
     
     if res_user.status_code==200:
-        print("here 'IM")
         user={
             "status":200,
             "user":res_user.data
@@ -55,6 +69,11 @@ def create_user_in_table(user_details,tokens):
         u'email': "not available"  if user_details["user"]["mail"]==None else  user_details["user"]["mail"] ,
         u'access_token':tokens["access_token"],
         u'refresh_token':tokens["refresh_token"],
+        u'refresh_token_date':datetime.now(),
+        u'subscribed':1,
+        u'last_notification':'N/A',
+        u'last_notification_date_time':datetime.now(),
+        u'webhook':'N/A',
         u'signup_date':datetime.now(),
     }
     t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
@@ -63,8 +82,7 @@ def create_user_in_table(user_details,tokens):
     return user_cre
     
 def retrive_user(email_id):
-    t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
-    table_client = t_client.get_table_client(table_name="mailscraperapi")
+    table_client=get_table_client()
     
     my_filter = "RowKey eq '"+email_id+"'"
     entities = table_client.query_entities(my_filter)
@@ -74,7 +92,6 @@ def retrive_user(email_id):
         for key in entity.keys():
             t=t+1
             user[key]=entity[key]
-            print("Key: {}, Value: {}".format(key, entity[key]))
     if t==0:
         user={
             "status":400,
@@ -130,6 +147,9 @@ def subscribe():
                     url_gen=url_generator()
                     return redirect(url_gen)
             tokens=refresh_token(user)
+            user["access_token"]=tokens["access_token"]
+            user["refresh_token"]=tokens["refresh_token"]
+            update_user(user)
             set_current_user(tokens)
             data=retrive_mails()
             return jsonify(data) 
@@ -150,8 +170,9 @@ def get_url():
                     user=retrive_user(user_details["user"]["userPrincipalName"])
                     if user["status"]==400:
                         create_user_in_table(user_details,tokens)
+                        data=retrive_mails()
                     # save_token(tokens,user_details)
-                        return redirect("/?msg=Successfully Saved new Users")
+                        return jsonify(data)
                     else:
                         data=retrive_mails()
                         return jsonify(data)
