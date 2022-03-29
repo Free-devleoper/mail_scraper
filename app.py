@@ -12,7 +12,6 @@ from flask_cors import CORS
 import requests
 from datetime import datetime
 from microsoftgraph.client import Client
-import json
 
 from Data import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, SCOPE, T_CONNECTION
 template_dir = os.path.dirname(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
