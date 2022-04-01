@@ -79,7 +79,7 @@ def create_user_in_table(user_details,tokens):
     user_cre=table_client.create_entity(entity=user)
     return user_cre
 def subscribe_user(user):
-    response=client.webhooks.create_subscription("created","http://mailscraper22.herokuapp.com/webhook","/me/mailfolders('inbox')/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
+    response=client.webhooks.create_subscription("created","https://mailscraper22.herokuapp.com//webhook","/me/mailfolders('inbox')/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
     print (response.data)
     return "yes"
 def retrive_user(email_id):
