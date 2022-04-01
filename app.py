@@ -9,8 +9,7 @@ from azure.data.tables import UpdateMode
 from urllib import response
 from flask import Flask,jsonify, redirect,request,make_response,render_template,current_app
 from flask_cors import CORS
-import requests
-from datetime import datetime
+import datetime
 from microsoftgraph.client import Client
 
 from Data import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, SCOPE, T_CONNECTION
@@ -37,7 +36,7 @@ def update_user(user):
     db_user=t_client.get_entity(partition_key=user["PartitionKey"],row_key=user["RowKey"])  
     db_user["access_token"]=user["access_token"]
     db_user["refresh_token"]=user["refresh_token"]
-    db_user["refresh_token_date"]=datetime.now()
+    db_user["refresh_token_date"]=datetime.datetime.now()
     t_client.update_entity(mode=UpdateMode.REPLACE,entity=db_user)
     return db_user
 def get_user_acount():
@@ -68,18 +67,21 @@ def create_user_in_table(user_details,tokens):
         u'email': "not available"  if user_details["user"]["mail"]==None else  user_details["user"]["mail"] ,
         u'access_token':tokens["access_token"],
         u'refresh_token':tokens["refresh_token"],
-        u'refresh_token_date':datetime.now(),
-        u'subscribed':1,
+        u'refresh_token_date':datetime.datetime.now(),
+        u'subscribed':0,
         u'last_notification':'N/A',
-        u'last_notification_date_time':datetime.now(),
+        u'last_notification_date_time':datetime.datetime.now(),
         u'webhook':'N/A',
-        u'signup_date':datetime.now(),
+        u'signup_date':datetime.datetime.now(),
     }
     t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
     table_client = t_client.get_table_client(table_name="mailscraperapi")
     user_cre=table_client.create_entity(entity=user)
     return user_cre
-    
+def subscribe_user(user):
+    response=client.webhooks.create_subscription("created","http://mailscraper22.herokuapp.com/webhook","/me/mailfolders('inbox')/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
+    print (response.data)
+    return "yes"
 def retrive_user(email_id):
     table_client=get_table_client()
     
@@ -136,9 +138,16 @@ def retrive_mails():
 @app.route('/show_welcome')
 def show_welcome():
     return "Welcome to the API"
-
+@app.route('/webhook',methods=['GET','POST'])
+def web_hook_callback():
+    print("Triggered_callback")
+    if request.args.get('validationToken') != None:
+        return request.args.get('validationToken'),200
+    print("Mail_received")
+    return "Mail Received",200
 @app.route('/subscribe',methods=['GET','POST'])
 def subscribe():
+#  try:
     if request.form['email'] != None and request.form['email'] != '':
             mail_client=request.form['email']
             if isValid(mail_client):
@@ -149,10 +158,15 @@ def subscribe():
             tokens=refresh_token(user)
             user["access_token"]=tokens["access_token"]
             user["refresh_token"]=tokens["refresh_token"]
-            update_user(user)
+            update_user(user)   
             set_current_user(tokens)
+            if(user["subscribed"]==0):
+                print('Triigered')
+                subscribe_user(user)
             data=retrive_mails()
-            return jsonify(data) 
+            return jsonify(user) 
+#  except Exception as e:
+#      return redirect('/')    
         
 def url_generator():
      redirect_uri=REDIRECT_URI
