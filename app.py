@@ -167,7 +167,7 @@ def save_email(user,message):
     user={
         u'PartitionKey':message["id"],
         u'RowKey':user["RowKey"],
-        u'From':message["sender"],
+        u'From':message["from"]["emailAddress"]["address"],
         u'Sent_date_time':message["sentDateTime"],
         u'content':message["body"]["content"],
     }
