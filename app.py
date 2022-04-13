@@ -1,5 +1,7 @@
+from cmath import e
 import os
 import re
+import threading
 from traceback import print_tb
 from http import client
 from sqlite3 import connect
@@ -39,6 +41,20 @@ def update_user(user):
     db_user["refresh_token_date"]=datetime.datetime.now()
     t_client.update_entity(mode=UpdateMode.REPLACE,entity=db_user)
     return db_user
+def update_user_subscription(user):
+    t_client=get_table_client()
+    db_user=t_client.get_entity(partition_key=user["PartitionKey"],row_key=user["RowKey"])  
+    db_user["subscription_id"]=user["subscription_id"]
+    db_user["subscribtion_expiry_date"]=user["subscribtion_expiry_date"]
+    db_user["subscribed"]=user["subscribed"]
+    t_client.update_entity(mode=UpdateMode.REPLACE,entity=db_user)
+    return db_user
+def renew_subscription(user):
+ try:
+    client.webhooks.renew_subscription(user["subscription_id"], datetime.datetime.now()+datetime.timedelta(days=2))
+    return True
+ except Exception as e:   
+    return False
 def get_user_acount():
     res_user=client.users.get_me()
     
@@ -68,6 +84,8 @@ def create_user_in_table(user_details,tokens):
         u'access_token':tokens["access_token"],
         u'refresh_token':tokens["refresh_token"],
         u'refresh_token_date':datetime.datetime.now(),
+        u'subscription_id':'1234567890',
+        u'subscribtion_expiry_date':datetime.datetime.now(),
         u'subscribed':0,
         u'last_notification':'N/A',
         u'last_notification_date_time':datetime.datetime.now(),
@@ -79,8 +97,16 @@ def create_user_in_table(user_details,tokens):
     user_cre=table_client.create_entity(entity=user)
     return user_cre
 def subscribe_user(user):
-    response=client.webhooks.create_subscription("created","https://mailscraper22.herokuapp.com//webhook","/me/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
-    print (response.data)
+    response=client.webhooks.create_subscription("created","https://mailscraper22.herokuapp.com/webhook","/me/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
+    print(response.status_code)
+    if(response.status_code==201):
+        print (response.data)
+        user["subscription_id"]=response.data["id"]
+        user["subscribtion_expiry_date"]=response.data["expirationDateTime"]
+        user["subscribed"]=1
+        update_user_subscription(user)
+    else:
+        raise Exception("Something went wrong in Creating Subscription Please try again")
     return "yes"
 def retrive_user(email_id):
     table_client=get_table_client()
@@ -140,12 +166,10 @@ def show_welcome():
     return "Welcome to the API"
 @app.route('/webhook',methods=['GET','POST'])
 def web_hook_callback():
-    print("Triggered_callback")
     if request.args.get('validationToken') != None:
         return request.args.get('validationToken'),200
-    print(request.get_json())
-    print("Mail_received")
-    return "Mail Received",200
+    else:
+        return "Mail Not received",200
 @app.route('/subscribe',methods=['GET','POST'])
 def subscribe():
 #  try:
@@ -165,7 +189,7 @@ def subscribe():
                 print('Triigered')
                 subscribe_user(user)
             data=retrive_mails()
-            return jsonify(user) 
+            return jsonify(data) 
 #  except Exception as e:
 #      return redirect('/')    
         
@@ -184,18 +208,48 @@ def get_url():
                     user_details=get_user_acount()
                     user=retrive_user(user_details["user"]["userPrincipalName"])
                     if user["status"]==400:
-                        create_user_in_table(user_details,tokens)
+                        user_cre=create_user_in_table(user_details,tokens)
+                        user=retrive_user(user_details["user"]["userPrincipalName"])
+                        subscribe_user(user)
                         data=retrive_mails()
                     # save_token(tokens,user_details)
                         return jsonify(data)
                     else:
-                        data=retrive_mails()
-                        return jsonify(data)
+                        user["access_token"]=tokens["access_token"]
+                        user["refresh_token"]=tokens["refresh_token"]
+                        update_user(user)
+                        if(user["subscribed"]==0):
+                            subscribe_user(user)
+                            data=retrive_mails()
+                            return jsonify(data)
                         # return redirect("/?msg=User already exists")
         except Exception as e:
                 return "Status:Failed"+str(e)
      else:
         return redirect("/")
+@app.route("/deletesubscription",methods=['GET','POST'])
+def unsubscribe():
+ try:    
+    if(request.args["email"]):
+        mail=request.args["email"]
+        user=retrive_user(mail)
+        if(user["status"]==200):
+         if(user["subscribed"]==1):
+            tokens=refresh_token(user)
+            user["access_token"]=tokens["access_token"]
+            user["refresh_token"]=tokens["refresh_token"]
+            update_user(user)
+            set_current_user(tokens)
+            client.webhooks.delete_subscription(user["subscription_id"])
+            user["subscription_id"]="Unsubscribed"
+            user["subscribed"]=0
+            user["subscribtion_expiry_date"]=''
+            update_user_subscription(user)
+            return "SuccessFuly Unsubscribed",201
+        else:
+            return "User is not subscribed",400
+ except:
+      return redirect("/")
 @app.route("/")
 def hello_world():
     return render_template('index.html')
