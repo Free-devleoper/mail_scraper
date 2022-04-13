@@ -80,7 +80,22 @@ def create_user_in_table(user_details,tokens):
     table_client = t_client.get_table_client(table_name="mailscraperapi")
     user_cre=table_client.create_entity(entity=user)
     return user_cre
+<<<<<<< Updated upstream
     
+=======
+def subscribe_user(user):
+    response=client.webhooks.create_subscription("created","https://mailscraper22.herokuapp.com/webhook","/me/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
+    #print(response.status_code)
+    if(response.status_code==201):
+        #print (response.data)
+        user["subscription_id"]=response.data["id"]
+        user["subscribtion_expiry_date"]=response.data["expirationDateTime"]
+        user["subscribed"]=1
+        update_user_subscription(user)
+    else:
+        raise Exception("Something went wrong in Creating Subscription Please try again")
+    return "yes"
+>>>>>>> Stashed changes
 def retrive_user(email_id):
     table_client=get_table_client()
     
@@ -106,6 +121,15 @@ def save_token(tokens,user):
     return True
 def edit_user_table():
     return
+<<<<<<< Updated upstream
+=======
+def get_message(message_id):
+    resp=client.mail.get_message(message_id)
+    if(resp.status_code==200):
+       # print(resp.data)
+        return resp.data
+    return "Not found"
+>>>>>>> Stashed changes
 def get_Token_from_code(code):
     redirect_url=REDIRECT_URI
     response = client.exchange_code(redirect_url,code)
@@ -136,7 +160,33 @@ def retrive_mails():
 @app.route('/show_welcome')
 def show_welcome():
     return "Welcome to the API"
+<<<<<<< Updated upstream
 
+=======
+@app.route('/webhook',methods=['GET','POST'])
+def web_hook_callback():
+    if request.args.get('validationToken') != None:
+        return request.args.get('validationToken'),200
+    data=request.get_json()
+    def save_received_mail(**kwargs):
+        data=kwargs.get("data",{})
+        data=data["value"]
+        res_data=string_to_array(data[0]['resourceData']['@odata.id']) 
+        user=retrive_user(res_data[1])
+        tokens=refresh_token(user)
+        user["refresh_token"]=tokens["refresh_token"]
+        user["access_token"]=tokens["access_token"]
+        set_current_user(tokens)
+        update_user(user)
+        if(user["status"]==200):
+            message=get_message(res_data[3])
+            save_email(user,message)
+    thread = threading.Thread(target=save_received_mail, kwargs={
+                    'data': data})
+    thread.start()
+    #print("Mail_received")
+    return "Mail Received",200
+>>>>>>> Stashed changes
 @app.route('/subscribe',methods=['GET','POST'])
 def subscribe():
     if request.form['email'] != None and request.form['email'] != '':
@@ -151,6 +201,12 @@ def subscribe():
             user["refresh_token"]=tokens["refresh_token"]
             update_user(user)
             set_current_user(tokens)
+<<<<<<< Updated upstream
+=======
+            if(user["subscribed"]==0):
+                #print('Triigered')
+                subscribe_user(user)
+>>>>>>> Stashed changes
             data=retrive_mails()
             return jsonify(data) 
         
@@ -181,6 +237,39 @@ def get_url():
                 return "Status:Failed"+str(e)
      else:
         return redirect("/")
+<<<<<<< Updated upstream
+=======
+@app.route("/loop",methods=['GET','POST'])
+def loop():
+  val=[{'subscriptionId': '9adbbc59-74af-4b59-befa-429249a42c6a', 'subscriptionExpirationDateTime': '2022-04-15T07:37:07.433529-07:00', 'changeType': 'created', 'resource': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', 'resourceData': {'@odata.type': '#Microsoft.Graph.Message', '@odata.id': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', '@odata.etag': 'W/"CQAAABYAAAD4QwZui07pT63mjwyqAUSEAAAIyO8f"', 'id': 'AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA'}, 'clientState': None, 'tenantId': ''}]
+  user_data=val[0]['resourceData']['@odata.id']
+  user_data=user_data.split("/")
+  #print(user_data)
+  return "Loop"
+@app.route("/deletesubscription",methods=['GET','POST'])
+def unsubscribe():
+ try:    
+    if(request.args["email"]):
+        mail=request.args["email"]
+        user=retrive_user(mail)
+        if(user["status"]==200):
+         if(user["subscribed"]==1):
+            tokens=refresh_token(user)
+            user["access_token"]=tokens["access_token"]
+            user["refresh_token"]=tokens["refresh_token"]
+            update_user(user)
+            set_current_user(tokens)
+            client.webhooks.delete_subscription(user["subscription_id"])
+            user["subscription_id"]="Unsubscribed"
+            user["subscribed"]=0
+            user["subscribtion_expiry_date"]=''
+            update_user_subscription(user)
+            return "SuccessFuly Unsubscribed",201
+        else:
+            return "User is not subscribed",400
+ except:
+      return redirect("/")
+>>>>>>> Stashed changes
 @app.route("/")
 def hello_world():
     return render_template('index.html')
