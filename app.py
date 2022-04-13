@@ -168,7 +168,8 @@ def show_welcome():
 def web_hook_callback():
     if request.args.get('validationToken') != None:
         return request.args.get('validationToken'),200
-    print(request.get_json())
+    data=request.get_json()
+    print(data["value"]["resource"])
     print("Mail_received")
     return "Mail Received",200
 @app.route('/subscribe',methods=['GET','POST'])
