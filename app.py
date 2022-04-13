@@ -163,6 +163,18 @@ def get_Token_from_code(code):
             "Message":"Something went wrong Please try again"
         }
         return tokens
+def save_email(user,message):
+    user={
+        u'PartitionKey':message["id"],
+        u'RowKey':user["RowKey"],
+        u'From':message["sender"],
+        u'Sent_date_time':message["sentDateTime"],
+        u'content':message["body"]["content"],
+    }
+    t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
+    table_client = t_client.get_table_client(table_name="UserAction")
+    user_cre=table_client.create_entity(entity=user)
+    
 def set_current_user(tokens):
     client.set_token(tokens)
     return True
@@ -190,9 +202,9 @@ def web_hook_callback():
         user["access_token"]=tokens["access_token"]
         set_current_user(tokens)
         update_user(user)
-        get_message(res_data[3])
         if(user["status"]==200):
-            print(user)
+            message=get_message(res_data[3])
+            save_email(user,message)
     thread = threading.Thread(target=save_received_mail, kwargs={
                     'data': data})
     thread.start()
@@ -211,7 +223,7 @@ def subscribe():
             tokens=refresh_token(user)
             user["access_token"]=tokens["access_token"]
             user["refresh_token"]=tokens["refresh_token"]
-            update_user(user)   
+            update_user(user)
             set_current_user(tokens)
             if(user["subscribed"]==0):
                 print('Triigered')
