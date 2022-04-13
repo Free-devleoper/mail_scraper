@@ -112,8 +112,11 @@ def subscribe_user(user):
     return "yes"
 def retrive_user(email_id):
     table_client=get_table_client()
-    
-    my_filter = "RowKey eq '"+email_id+"'"
+    my_filter=''
+    if(isValid(email_id)):
+        my_filter = "RowKey eq '"+email_id+"'"
+    else:
+        my_filter = "PartitionKey eq '"+email_id+"'"
     entities = table_client.query_entities(my_filter)
     user={}
     t=0
@@ -176,7 +179,9 @@ def web_hook_callback():
         data=kwargs.get("data",{})
         data=data["value"]
         res_data=string_to_array(data[0]['resourceData']['@odata.id']) 
-        print(res_data[3])
+        user=retrive_user(res_data[1])
+        if(user["status"]==200):
+            print(user)
     thread = threading.Thread(target=save_received_mail, kwargs={
                     'data': data})
     thread.start()
