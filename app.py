@@ -1,5 +1,6 @@
 from cmath import e
 import os
+from posixpath import split
 import re
 import threading
 from traceback import print_tb
@@ -22,7 +23,8 @@ CORS(app)
 client=Client(CLIENT_ID,CLIENT_SECRET,account_type='common')
 regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
 
-
+def string_to_array(line):
+    return line.split("/")
 def get_table_client():
     t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
     table_client = t_client.get_table_client(table_name="mailscraperapi")
@@ -169,7 +171,15 @@ def web_hook_callback():
     if request.args.get('validationToken') != None:
         return request.args.get('validationToken'),200
     data=request.get_json()
-    print(data["value"])
+    def save_received_mail(**kwargs):
+        print("New Thread")
+        data=kwargs.get("data",{})
+        data=data["value"]
+        res_data=string_to_array(data[0]['resourceData']['@odata.id']) 
+        print(res_data[3])
+    thread = threading.Thread(target=save_received_mail, kwargs={
+                    'data': data})
+    thread.start()
     print("Mail_received")
     return "Mail Received",200
 @app.route('/subscribe',methods=['GET','POST'])
@@ -229,6 +239,13 @@ def get_url():
                 return "Status:Failed"+str(e)
      else:
         return redirect("/")
+@app.route("/loop",methods=['GET','POST'])
+def loop():
+  val=[{'subscriptionId': '9adbbc59-74af-4b59-befa-429249a42c6a', 'subscriptionExpirationDateTime': '2022-04-15T07:37:07.433529-07:00', 'changeType': 'created', 'resource': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', 'resourceData': {'@odata.type': '#Microsoft.Graph.Message', '@odata.id': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', '@odata.etag': 'W/"CQAAABYAAAD4QwZui07pT63mjwyqAUSEAAAIyO8f"', 'id': 'AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA'}, 'clientState': None, 'tenantId': ''}]
+  user_data=val[0]['resourceData']['@odata.id']
+  user_data=user_data.split("/")
+  print(user_data)
+  return "Loop"
 @app.route("/deletesubscription",methods=['GET','POST'])
 def unsubscribe():
  try:    
