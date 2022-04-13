@@ -263,18 +263,19 @@ def get_url():
                             subscribe_user(user)
                             #data=retrive_mails()
                             return "Already Subscribed",200
+                        return "Already Subscribed",200
                         # return redirect("/?msg=User already exists")
         except Exception as e:
                 return "Status:Failed"+str(e)
      else:
         return redirect("/")
-@app.route("/loop",methods=['GET','POST'])
-def loop():
-  val=[{'subscriptionId': '9adbbc59-74af-4b59-befa-429249a42c6a', 'subscriptionExpirationDateTime': '2022-04-15T07:37:07.433529-07:00', 'changeType': 'created', 'resource': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', 'resourceData': {'@odata.type': '#Microsoft.Graph.Message', '@odata.id': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', '@odata.etag': 'W/"CQAAABYAAAD4QwZui07pT63mjwyqAUSEAAAIyO8f"', 'id': 'AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA'}, 'clientState': None, 'tenantId': ''}]
-  user_data=val[0]['resourceData']['@odata.id']
-  user_data=user_data.split("/")
-  #print(user_data)
-  return "Loop"
+# @app.route("/loop",methods=['GET','POST'])
+# def loop():
+#   val=[{'subscriptionId': '9adbbc59-74af-4b59-befa-429249a42c6a', 'subscriptionExpirationDateTime': '2022-04-15T07:37:07.433529-07:00', 'changeType': 'created', 'resource': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', 'resourceData': {'@odata.type': '#Microsoft.Graph.Message', '@odata.id': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', '@odata.etag': 'W/"CQAAABYAAAD4QwZui07pT63mjwyqAUSEAAAIyO8f"', 'id': 'AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA'}, 'clientState': None, 'tenantId': ''}]
+#   user_data=val[0]['resourceData']['@odata.id']
+#   user_data=user_data.split("/")
+#   #print(user_data)
+#   return "Loop"
 @app.route("/deletesubscription",methods=['GET','POST'])
 def unsubscribe():
  try:    
