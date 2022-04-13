@@ -99,7 +99,7 @@ def create_user_in_table(user_details,tokens):
     user_cre=table_client.create_entity(entity=user)
     return user_cre
 def subscribe_user(user):
-    response=client.webhooks.create_subscription("created","https://mailscraper22.herokuapp.com/webhook","/me/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
+    response=client.webhooks.create_subscription("created","https://aisafetymailscrapper.azurewebsites.net/webhook","/me/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
     #print(response.status_code)
     if(response.status_code==201):
         #print (response.data)
@@ -229,8 +229,8 @@ def subscribe():
             if(user["subscribed"]==0):
                 #print('Triigered')
                 subscribe_user(user)
-            data=retrive_mails()
-            return jsonify(data) 
+            #data=retrive_mails()
+            return "Already Subscribed",200 
 #  except Exception as e:
 #      return redirect('/')    
         
@@ -252,17 +252,17 @@ def get_url():
                         user_cre=create_user_in_table(user_details,tokens)
                         user=retrive_user(user_details["user"]["userPrincipalName"])
                         subscribe_user(user)
-                        data=retrive_mails()
+                        #data=retrive_mails()
                     # save_token(tokens,user_details)
-                        return jsonify(data)
+                        return "Subscribed Sucessfully",200
                     else:
                         user["access_token"]=tokens["access_token"]
                         user["refresh_token"]=tokens["refresh_token"]
                         update_user(user)
                         if(user["subscribed"]==0):
                             subscribe_user(user)
-                            data=retrive_mails()
-                            return jsonify(data)
+                            #data=retrive_mails()
+                            return "Already Subscribed",200
                         # return redirect("/?msg=User already exists")
         except Exception as e:
                 return "Status:Failed"+str(e)
