@@ -139,6 +139,11 @@ def save_token(tokens,user):
     return True
 def edit_user_table():
     return
+def get_message(message_id):
+    resp=client.mail.get_message(message_id)
+    if(resp.status_code==200):
+        print(resp.data)
+    return resp.data
 def get_Token_from_code(code):
     redirect_url=REDIRECT_URI
     response = client.exchange_code(redirect_url,code)
@@ -180,6 +185,12 @@ def web_hook_callback():
         data=data["value"]
         res_data=string_to_array(data[0]['resourceData']['@odata.id']) 
         user=retrive_user(res_data[1])
+        tokens=refresh_token(user)
+        user["refresh_token"]=tokens["refresh_token"]
+        user["access_token"]=tokens["access_token"]
+        set_current_user(tokens)
+        update_user(user)
+        get_message(res_data[3])
         if(user["status"]==200):
             print(user)
     thread = threading.Thread(target=save_received_mail, kwargs={
