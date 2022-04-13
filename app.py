@@ -143,7 +143,8 @@ def get_message(message_id):
     resp=client.mail.get_message(message_id)
     if(resp.status_code==200):
         print(resp.data)
-    return resp.data
+        return resp.data
+    return "Not found"
 def get_Token_from_code(code):
     redirect_url=REDIRECT_URI
     response = client.exchange_code(redirect_url,code)
@@ -193,7 +194,6 @@ def web_hook_callback():
         return request.args.get('validationToken'),200
     data=request.get_json()
     def save_received_mail(**kwargs):
-        print("New Thread")
         data=kwargs.get("data",{})
         data=data["value"]
         res_data=string_to_array(data[0]['resourceData']['@odata.id']) 
