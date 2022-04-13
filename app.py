@@ -100,9 +100,9 @@ def create_user_in_table(user_details,tokens):
     return user_cre
 def subscribe_user(user):
     response=client.webhooks.create_subscription("created","https://mailscraper22.herokuapp.com/webhook","/me/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
-    print(response.status_code)
+    #print(response.status_code)
     if(response.status_code==201):
-        print (response.data)
+        #print (response.data)
         user["subscription_id"]=response.data["id"]
         user["subscribtion_expiry_date"]=response.data["expirationDateTime"]
         user["subscribed"]=1
@@ -142,7 +142,7 @@ def edit_user_table():
 def get_message(message_id):
     resp=client.mail.get_message(message_id)
     if(resp.status_code==200):
-        print(resp.data)
+        #print(resp.data)
         return resp.data
     return "Not found"
 def get_Token_from_code(code):
@@ -209,7 +209,7 @@ def web_hook_callback():
     thread = threading.Thread(target=save_received_mail, kwargs={
                     'data': data})
     thread.start()
-    print("Mail_received")
+    #print("Mail_received")
     return "Mail Received",200
 @app.route('/subscribe',methods=['GET','POST'])
 def subscribe():
@@ -227,7 +227,7 @@ def subscribe():
             update_user(user)
             set_current_user(tokens)
             if(user["subscribed"]==0):
-                print('Triigered')
+                #print('Triigered')
                 subscribe_user(user)
             data=retrive_mails()
             return jsonify(data) 
@@ -273,7 +273,7 @@ def loop():
   val=[{'subscriptionId': '9adbbc59-74af-4b59-befa-429249a42c6a', 'subscriptionExpirationDateTime': '2022-04-15T07:37:07.433529-07:00', 'changeType': 'created', 'resource': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', 'resourceData': {'@odata.type': '#Microsoft.Graph.Message', '@odata.id': 'Users/410eacc136576223/Messages/AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA', '@odata.etag': 'W/"CQAAABYAAAD4QwZui07pT63mjwyqAUSEAAAIyO8f"', 'id': 'AQMkADAwATMwMAItNGIwYi0xNjc5LTAwAi0wMAoARgAAA0V1Pwamy1tFpfjRi8Yb7MoHAPhDBm6LTulPreaPDKoBRIQAAAIBDAAAAPhDBm6LTulPreaPDKoBRIQAAAAIyrTnAAAA'}, 'clientState': None, 'tenantId': ''}]
   user_data=val[0]['resourceData']['@odata.id']
   user_data=user_data.split("/")
-  print(user_data)
+  #print(user_data)
   return "Loop"
 @app.route("/deletesubscription",methods=['GET','POST'])
 def unsubscribe():
