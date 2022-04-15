@@ -129,7 +129,7 @@ def update_access_token():
             return "Updated"
     thread = threading.Thread(target=updates,kwargs={'users': users})
     thread.start()
-    return jsonify(users),200   
+    return jsonify({"status":"Success"}),200   
 def create_user_in_table(user_details,tokens):
     user={
         u'PartitionKey':user_details["user"]["id"],
