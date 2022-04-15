@@ -1,4 +1,10 @@
 from cmath import e
+from email import header
+import json
+from queue import Empty
+from DateTimeEncoder import DateTimeEncoder
+import pytz
+from dateutil.parser import *
 import os
 from posixpath import split
 import re
@@ -7,6 +13,7 @@ from traceback import print_tb
 from http import client
 from sqlite3 import connect
 from unittest import result
+from wsgiref import headers
 from azure.data.tables import TableServiceClient
 from azure.data.tables import UpdateMode
 from urllib import response
@@ -22,7 +29,6 @@ app = Flask(__name__)
 CORS(app)
 client=Client(CLIENT_ID,CLIENT_SECRET,account_type='common')
 regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
-
 def string_to_array(line):
     return line.split("/")
 def get_table_client():
@@ -47,7 +53,7 @@ def update_user_subscription(user):
     t_client=get_table_client()
     db_user=t_client.get_entity(partition_key=user["PartitionKey"],row_key=user["RowKey"])  
     db_user["subscription_id"]=user["subscription_id"]
-    db_user["subscribtion_expiry_date"]=user["subscribtion_expiry_date"]
+    db_user["subscription_expiry_date"]=user["subscription_expiry_date"]
     db_user["subscribed"]=user["subscribed"]
     t_client.update_entity(mode=UpdateMode.REPLACE,entity=db_user)
     return db_user
@@ -77,6 +83,38 @@ def refresh_token(user):
     if response.status_code==200:
         tokens=response.data
         return tokens
+    
+def get_last_date(date):
+    Last_date = {'date':date}
+    Last_date=json.dumps(Last_date,cls=DateTimeEncoder)
+    Last_date=json.loads(Last_date)
+    Last_date=parse(Last_date["date"])
+    return Last_date
+def get_all_users():
+    table_client=get_table_client()
+    parameters = {
+    "refresh_token_date":datetime.datetime.now()-datetime.timedelta(days=5)
+}
+    query_filter = "subscription_expiry_date le @refresh_token_date"
+    entities=table_client.query_entities(query_filter,headers={'Content-Type':'application/json;odata=nometadata'}, parameters=parameters)
+    user={}
+    users=[]
+    t=0
+    for entity in entities: 
+        users.append(entity)
+            #users=jsonify(users)
+    return users
+@app.route('/update_access_token',methods=['POST','GET'])
+def update_access_token():
+    users=get_all_users()
+    if not users:
+        return "No Users",200
+    else:
+        Last_date=get_last_date(users[0]["refresh_token_date"])
+        now=pytz.utc.localize(datetime.datetime.now())
+        if(now-Last_date).days>=2:
+            print("-----",users[0]["refresh_token_date"])
+    return jsonify(users),200   
 def create_user_in_table(user_details,tokens):
     user={
         u'PartitionKey':user_details["user"]["id"],
@@ -87,7 +125,7 @@ def create_user_in_table(user_details,tokens):
         u'refresh_token':tokens["refresh_token"],
         u'refresh_token_date':datetime.datetime.now(),
         u'subscription_id':'1234567890',
-        u'subscribtion_expiry_date':datetime.datetime.now(),
+        u'subscription_expiry_date':datetime.datetime.now(),
         u'subscribed':0,
         u'last_notification':'N/A',
         u'last_notification_date_time':datetime.datetime.now(),
@@ -104,7 +142,7 @@ def subscribe_user(user):
     if(response.status_code==201):
         #print (response.data)
         user["subscription_id"]=response.data["id"]
-        user["subscribtion_expiry_date"]=response.data["expirationDateTime"]
+        user["subscription_expiry_date"]=parse(response.data["expirationDateTime"])
         user["subscribed"]=1
         update_user_subscription(user)
     else:
@@ -292,7 +330,7 @@ def unsubscribe():
             client.webhooks.delete_subscription(user["subscription_id"])
             user["subscription_id"]="Unsubscribed"
             user["subscribed"]=0
-            user["subscribtion_expiry_date"]=''
+            user["subscription_expiry_date"]=''
             update_user_subscription(user)
             return "SuccessFuly Unsubscribed",201
         else:

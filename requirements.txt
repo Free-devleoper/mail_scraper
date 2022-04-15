@@ -1,5 +1,6 @@
 azure-core==1.23.0
 azure-data-tables==12.3.0
+azure-functions==1.10.1
 certifi==2021.10.8
 charset-normalizer==2.0.12
 click==8.0.4
