@@ -59,10 +59,14 @@ def update_user_subscription(user):
     return db_user
 def renew_subscription(user):
  try:
-    client.webhooks.renew_subscription(user["subscription_id"], datetime.datetime.now()+datetime.timedelta(days=2))
-    return True
+    res=client.webhooks.renew_subscription(user["subscription_id"], datetime.datetime.now()+datetime.timedelta(days=2))
+    if res.status_code==200:
+        print(res.data)
+        return res.data
+    else:
+        return {"status":400,"Message":"Something went wrong Please try again"}
  except Exception as e:   
-    return False
+    return print(str(e))
 def get_user_acount():
     res_user=client.users.get_me()
     
@@ -93,7 +97,7 @@ def get_last_date(date):
 def get_all_users():
     table_client=get_table_client()
     parameters = {
-    "refresh_token_date":datetime.datetime.now()-datetime.timedelta(days=5)
+    "refresh_token_date":datetime.datetime.now()-datetime.timedelta(days=1)
 }
     query_filter = "subscription_expiry_date le @refresh_token_date"
     entities=table_client.query_entities(query_filter,headers={'Content-Type':'application/json;odata=nometadata'}, parameters=parameters)
@@ -107,13 +111,24 @@ def get_all_users():
 @app.route('/update_access_token',methods=['POST','GET'])
 def update_access_token():
     users=get_all_users()
-    if not users:
-        return "No Users",200
-    else:
-        Last_date=get_last_date(users[0]["refresh_token_date"])
-        now=pytz.utc.localize(datetime.datetime.now())
-        if(now-Last_date).days>=2:
-            print("-----",users[0]["refresh_token_date"])
+    def updates(**kwargs):
+        users=kwargs.get("users",{})
+        if not users:
+            return "No Users",200
+        else:
+            for i,user in enumerate(users):
+                tokens=refresh_token(user)
+                user["refresh_token"]=tokens["refresh_token"]
+                user["access_token"]=tokens["access_token"]
+                set_current_user(tokens)
+                update_user(user)
+                sub=renew_subscription(user)
+                user["subscription_id"]=sub["id"]
+                user["subscription_expiry_date"]=sub["expirationDateTime"]
+                update_user_subscription(user)
+            return "Updated"
+    thread = threading.Thread(target=updates,kwargs={'users': users})
+    thread.start()
     return jsonify(users),200   
 def create_user_in_table(user_details,tokens):
     user={
