@@ -332,11 +332,11 @@ def unsubscribe():
             user["subscribed"]=0
             user["subscription_expiry_date"]=''
             update_user_subscription(user)
-            return "SuccessFuly Unsubscribed",201
+            return "SuccessFuly Unsubscribed",200
         else:
             return "User is not subscribed",400
- except:
-      return redirect("/")
+ except Exception as e:
+      return str(e)
 @app.route("/")
 def hello_world():
     return render_template('index.html')
