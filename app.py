@@ -99,8 +99,8 @@ def get_all_users():
     parameters = {
     "refresh_token_date":datetime.datetime.now()-datetime.timedelta(days=1)
 }
-    query_filter = "subscription_expiry_date le @refresh_token_date"
-    entities=table_client.query_entities(query_filter,headers={'Content-Type':'application/json;odata=nometadata'}, parameters=parameters)
+    query_filter = ""
+    entities=table_client.query_entities(query_filter,headers={'Content-Type':'application/json;odata=nometadata'})
     user={}
     users=[]
     t=0
@@ -113,6 +113,7 @@ def update_access_token():
     users=get_all_users()
     def updates(**kwargs):
         users=kwargs.get("users",{})
+        print(users)
         if not users:
             return "No Users",200
         else:
