@@ -224,7 +224,8 @@ def save_email(user,message):
         u'RowKey':user["RowKey"],
         u'From':message["from"]["emailAddress"]["address"],
         u'Sent_date_time':message["sentDateTime"],
-        u'Subject':message["subject"],
+        #u'Subject':message["subject"],
+        u'Subject':"Hello World!",
         u'content':message["body"]["content"],
     }
     t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
