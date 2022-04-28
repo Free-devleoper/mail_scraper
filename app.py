@@ -231,7 +231,7 @@ def save_email(user,message):
     
     try:
         azure_func_url = "https://aisafety-outlook-inference-api.azurewebsites.net/api/Function-Outlook-Inference-API?code=nTTLBI/fg72QcBOQ8aDtoswJGDNnZJqJADxRqtFIH0XTYXZJ5NeDKQ=="
-        azure_func_url += "&request_type=fromapp" + "&emailfrom=" + message["from"]["emailAddress"]["address"] + "&emailsubject=" + message["subject"]
+        azure_func_url += "&type=fromapp" + "&emailfrom=" + message["from"]["emailAddress"]["address"] + "&emailsubject=" + message["subject"]
         azure_func_url += "&hashstring=dd803e6"
         data = {"emailbody": message["body"]["content"]}
         data_json = json.dumps(data)
