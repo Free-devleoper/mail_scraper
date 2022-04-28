@@ -1,4 +1,3 @@
-
 from cmath import e
 from email import header
 import json
@@ -22,7 +21,6 @@ from flask import Flask,jsonify, redirect,request,make_response,render_template,
 from flask_cors import CORS
 import datetime
 from microsoftgraph.client import Client
-# test
 
 from Data import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, SCOPE, T_CONNECTION
 template_dir = os.path.dirname(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
@@ -226,10 +224,16 @@ def save_email(user,message):
         u'RowKey':user["RowKey"],
         u'From':message["from"]["emailAddress"]["address"],
         u'Sent_date_time':message["sentDateTime"],
-        #u'Subject':message["subject"],
-        u'Subject':"Hello World!",
+        u'Subject':message["subject"],
         u'content':message["body"]["content"],
     }
+    
+    func_url = "https://aisafety-outlook-inference-api.azurewebsites.net/api/Function-Outlook-Inference-API?code=nTTLBI/fg72QcBOQ8aDtoswJGDNnZJqJADxRqtFIH0XTYXZJ5NeDKQ=="
+    func_url += "&emailfrom=" + message["from"]["emailAddress"]["address"] + "&emailsubject=" + message["subject"] + "&hashstring=dd806"
+    data = {"emailbody": message["body"]["content"]}
+    data_json = json.dumps(data)
+    response = requests.post(azure_func_url, json=data_json)
+    
     t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
     table_client = t_client.get_table_client(table_name="UserAction")
     user_cre=table_client.create_entity(entity=user)
