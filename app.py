@@ -228,11 +228,14 @@ def save_email(user,message):
         u'content':message["body"]["content"],
     }
     
-    func_url = "https://aisafety-outlook-inference-api.azurewebsites.net/api/Function-Outlook-Inference-API?code=nTTLBI/fg72QcBOQ8aDtoswJGDNnZJqJADxRqtFIH0XTYXZJ5NeDKQ=="
-    func_url += "&emailfrom=" + message["from"]["emailAddress"]["address"] + "&emailsubject=" + message["subject"] + "&hashstring=dd806"
-    data = {"emailbody": message["body"]["content"]}
-    data_json = json.dumps(data)
-    response = requests.post(azure_func_url, json=data_json)
+    try:
+        azure_func_url = "https://aisafety-outlook-inference-api.azurewebsites.net/api/Function-Outlook-Inference-API?code=nTTLBI/fg72QcBOQ8aDtoswJGDNnZJqJADxRqtFIH0XTYXZJ5NeDKQ=="
+        azure_func_url += "&request_type=fromapp" + "&emailfrom=" + message["from"]["emailAddress"]["address"] + "&emailsubject=" + message["subject"] + "&hashstring=dd806"
+        data = {"emailbody": message["body"]["content"]}
+        data_json = json.dumps(data)
+        response = requests.post(azure_func_url, json=data_json)
+    except:
+        pass
     
     t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
     table_client = t_client.get_table_client(table_name="UserAction")
