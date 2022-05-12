@@ -269,9 +269,14 @@ def web_hook_callback():
         user["access_token"]=tokens["access_token"]
         set_current_user(tokens)
         update_user(user)
-        if(user["status"]==200):
-            message=get_message(res_data[3])
-            save_email(user,message)
+        
+        if user["status"] == 200:
+            if user["RowKey"] == "adjutor@aisafety.com":
+                r = requests.get(url = "https://attachmentanalysis.azurewebsites.net/api/attachmentanalysisfunction?code=jYDMd5vk7VS3Ch_UAXlCXVAqNyqJuxBgeEaLvcvn_ehjAzFuBUGY9A==", params = {})
+            else:
+                message=get_message(res_data[3])
+                save_email(user,message)
+            
     thread = threading.Thread(target=save_received_mail, kwargs={
                     'data': data})
     thread.start()
