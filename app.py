@@ -271,10 +271,20 @@ def web_hook_callback():
         update_user(user)
         
         if user["status"] == 200:
+            message=get_message(res_data[3])
             if user["RowKey"] == "adjutor@aisafety.com":
                 r = requests.get(url = "https://attachmentanalysis.azurewebsites.net/api/attachmentanalysisfunction?code=jYDMd5vk7VS3Ch_UAXlCXVAqNyqJuxBgeEaLvcvn_ehjAzFuBUGY9A==", params = {})
+                # respond to e-mail
+                data = {
+                    subject="Meet for lunch?",
+                    content="The new cafeteria is open.",
+                    content_type="text",
+                    to_recipients=["soeren@aisafety.com"],
+                    cc_recipients=None,
+                    save_to_sent_items=True,
+                }
+                response = client.mail.send_mail(**data)
             else:
-                message=get_message(res_data[3])
                 save_email(user,message)
             
     thread = threading.Thread(target=save_received_mail, kwargs={
