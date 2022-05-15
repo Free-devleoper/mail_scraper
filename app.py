@@ -275,17 +275,17 @@ def web_hook_callback():
             if user["RowKey"] == "adjutor@aisafety.com":
                 r = requests.get(url = "https://attachmentanalysis.azurewebsites.net/api/attachmentanalysisfunction?code=jYDMd5vk7VS3Ch_UAXlCXVAqNyqJuxBgeEaLvcvn_ehjAzFuBUGY9A==", params = {})
                 # respond to e-mail
-                """
+                
                 data = {
-                    "subject"="Meet for lunch?",
-                    "content"="The new cafeteria is open.",
-                    "content_type"="text",
-                    "to_recipients"=["soeren@aisafety.com"],
-                    "cc_recipients"=None,
-                    "save_to_sent_items"=True,
+                    "subject":"Meet for lunch?",
+                    "content":"The new cafeteria is open.",
+                    "content_type":"text",
+                    "to_recipients":["soeren@aisafety.com"],
+                    "cc_recipients":None,
+                    "save_to_sent_items":True,
                 }
                 response = client.mail.send_mail(**data)
-                """
+                
             else:
                 save_email(user,message)
             
