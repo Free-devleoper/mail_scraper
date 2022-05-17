@@ -272,7 +272,11 @@ def web_hook_callback():
         
         if user["status"] == 200:
             message=get_message(res_data[3])
-            if user["RowKey"] == "adjutor@aisafety.com":
+            if message["from"]["emailAddress"]["address"] == "adjutor@aisafety.com":
+                print("Message is from Adjutor.")
+                pass
+            
+            elif user["RowKey"] == "adjutor@aisafety.com":
                 r = requests.get(url = "https://attachmentanalysis.azurewebsites.net/api/attachmentanalysisfunction?code=jYDMd5vk7VS3Ch_UAXlCXVAqNyqJuxBgeEaLvcvn_ehjAzFuBUGY9A==", params = {})
                 # respond to e-mail
                 print(str(message))
