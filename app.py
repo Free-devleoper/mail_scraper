@@ -256,10 +256,12 @@ def show_welcome():
     return "Welcome to the API"
 @app.route('/webhook',methods=['GET','POST'])
 def web_hook_callback():
+    print("web_hook_callback called")
     if request.args.get('validationToken') != None:
         return request.args.get('validationToken'),200
     data=request.get_json()
     def save_received_mail(**kwargs):
+        print("Starting save_received_mail:")
         data=kwargs.get("data",{})
         data=data["value"]
         res_data=string_to_array(data[0]['resourceData']['@odata.id']) 
