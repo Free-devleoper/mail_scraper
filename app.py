@@ -277,12 +277,12 @@ def web_hook_callback():
                 # respond to e-mail
                 
                 data = {
-                    "subject":"Meet for lunch?",
-                    "content":"The new cafeteria is open.",
-                    "content_type":"text",
-                    "to_recipients":["soeren@aisafety.com"],
-                    "cc_recipients":None,
-                    "save_to_sent_items":True,
+                    "subject": "Attachment analysis for: " + message["subject"],
+                    "content": message["body"]["content"],
+                    "content_type": "text",
+                    "to_recipients": [message["from"]["emailAddress"]["address"]],
+                    "cc_recipients": None,
+                    "save_to_sent_items": True,
                 }
                 response = client.mail.send_mail(**data)
                 
