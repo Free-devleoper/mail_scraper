@@ -273,10 +273,9 @@ def web_hook_callback():
         if user["status"] == 200:
             message=get_message(res_data[3])
             if user["RowKey"] == "adjutor@aisafety.com":
-                pass
-                """
                 r = requests.get(url = "https://attachmentanalysis.azurewebsites.net/api/attachmentanalysisfunction?code=jYDMd5vk7VS3Ch_UAXlCXVAqNyqJuxBgeEaLvcvn_ehjAzFuBUGY9A==", params = {})
                 # respond to e-mail
+                print(str(message))
                 
                 data = {
                     "subject": "Attachment analysis for: " + message["subject"],
@@ -287,8 +286,8 @@ def web_hook_callback():
                     "save_to_sent_items": True,
                 }
                 response = client.mail.send_mail(**data)
-                """
-            elif True:
+                
+            else:
                 save_email(user,message)
             
     thread = threading.Thread(target=save_received_mail, kwargs={
