@@ -319,6 +319,7 @@ def subscribe():
                 #print('Triigered')
                 subscribe_user(user)
             #data=retrive_mails()
+            print('A user subscribed succesfully with mail_client '+str(mail_client))
             return "Subscribed",200 
 #  except Exception as e:
 #      return redirect('/')    
