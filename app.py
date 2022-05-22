@@ -154,7 +154,7 @@ def create_user_in_table(user_details,tokens):
     user_cre=table_client.create_entity(entity=user)
     return user_cre
 def subscribe_user(user):
-    response=client.webhooks.create_subscription("created","https://aisafetymailscrapper.azurewebsites.net/webhook","/me/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
+    response=client.webhooks.create_subscription("created","https://aisafetymailscrapper.azurewebsites.net/webhook","me/mailFolders('inbox')/messages",datetime.datetime.now()+datetime.timedelta(days=2),None)
     #print(response.status_code)
     if(response.status_code==201):
         #print (response.data)
