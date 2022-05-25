@@ -255,7 +255,6 @@ def retrive_mails():
 @app.route('/show_welcome')
 def show_welcome():
     return "Welcome to the API"
-@app.route('/webhook',methods=['GET','POST'])
 
 def myLogDebug(msg):
     logger = logging.getLogger('mail_scraper')
@@ -265,6 +264,7 @@ def myLogDebug(msg):
     logger.addHandler(fh)
     logger.debug(msg)
     
+@app.route('/webhook',methods=['GET','POST'])  
 def web_hook_callback():
     print("web_hook_callback called")
     myLogDebug("Web_hoot_callback called")
