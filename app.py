@@ -22,6 +22,7 @@ from flask_cors import CORS
 import datetime
 from microsoftgraph.client import Client
 import requests
+import logging
 
 from Data import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, SCOPE, T_CONNECTION
 template_dir = os.path.dirname(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
@@ -255,8 +256,18 @@ def retrive_mails():
 def show_welcome():
     return "Welcome to the API"
 @app.route('/webhook',methods=['GET','POST'])
+
+def myLogDebug(msg):
+    logger = logging.getLogger('mail_scraper')
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler('log.txt')
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
+    logger.debug(msg)
+    
 def web_hook_callback():
     print("web_hook_callback called")
+    myLogDebug("Web_hoot_callback called")
     if request.args.get('validationToken') != None:
         return request.args.get('validationToken'),200
     data=request.get_json()
