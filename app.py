@@ -257,7 +257,7 @@ def show_welcome():
     return "Welcome to the API"
 
 def myLogDebug(msg):
-    logger = logging.getLogger('mail_scraper')
+    logger = logging.getLogger('mail_scraper2')
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler('log.txt')
     fh.setLevel(logging.DEBUG)
