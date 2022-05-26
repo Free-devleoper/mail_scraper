@@ -35,10 +35,10 @@ regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{
 """ Logging initialization """
 logger = logging.getLogger('mail_scraper')
 logger.setLevel(logging.DEBUG)
-FORMAT = '%(asctime)s %(message)s'
-logging.basicConfig(format=FORMAT)    
+formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(funcName)s %(message)s")
 fh = logging.FileHandler('logFormatted.txt')
 fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 def string_to_array(line):
