@@ -31,6 +31,16 @@ app = Flask(__name__)
 CORS(app)
 client=Client(CLIENT_ID,CLIENT_SECRET,account_type='common')
 regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
+
+""" Logging initialization """
+logger = logging.getLogger('mail_scraper')
+logger.setLevel(logging.DEBUG)
+FORMAT = '%(asctime)s %(message)s'
+logging.basicConfig(format=FORMAT)    
+fh = logging.FileHandler('logFormatted.txt')
+fh.setLevel(logging.DEBUG)
+logger.addHandler(fh)
+
 def string_to_array(line):
     return line.split("/")
 def get_table_client():
@@ -264,21 +274,10 @@ def myLogDebug(msg):
     logger.addHandler(fh)
     logger.debug(msg)
 
-def myLogDebugFormatted(msg):
-    logger = logging.getLogger('mail_scraper')
-    logger.setLevel(logging.DEBUG)
-    FORMAT = '%(asctime)s %(message)s'
-    logging.basicConfig(format=FORMAT)    
-    fh = logging.FileHandler('logFormatted.txt')
-    fh.setLevel(logging.DEBUG)
-    logger.addHandler(fh)
-    logger.debug(msg)    
-    
 @app.route('/webhook',methods=['GET','POST'])  
 def web_hook_callback():
     print("web_hook_callback called")
-    myLogDebug("Web_hoot_callback called")
-    myLogDebugFormatted("Web_hook_callback called")
+    logger.debug("Web_hook_callback called")
     if request.args.get('validationToken') != None:
         return request.args.get('validationToken'),200
     data=request.get_json()
