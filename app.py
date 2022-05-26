@@ -20,6 +20,7 @@ from urllib import response
 from flask import Flask,jsonify, redirect,request,make_response,render_template,current_app
 from flask_cors import CORS
 import datetime
+from datetime import date
 from microsoftgraph.client import Client
 import requests
 import logging
@@ -35,9 +36,12 @@ regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{
 """ Logging initialization """
 logger = logging.getLogger('mail_scraper')
 logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(funcName)s %(message)s")
-fh = logging.FileHandler('logFormatted.txt')
+today = date.today()
+d1 = today.strftime("%d")
+if not os.path.exists("log"): os.makedirs("log")
+fh = logging.FileHandler('log\log'+d1+'.txt')
 fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(funcName)s %(message)s")
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
