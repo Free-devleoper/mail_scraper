@@ -263,11 +263,22 @@ def myLogDebug(msg):
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
     logger.debug(msg)
+
+def myLogDebugFormatted(msg):
+    logger = logging.getLogger('mail_scraper')
+    logger.setLevel(logging.DEBUG)
+    FORMAT = '%(asctime)s %(message)s'
+    logging.basicConfig(format=FORMAT)    
+    fh = logging.FileHandler('logFormatted.txt')
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
+    logger.debug(msg)    
     
 @app.route('/webhook',methods=['GET','POST'])  
 def web_hook_callback():
     print("web_hook_callback called")
     myLogDebug("Web_hoot_callback called")
+    myLogDebugFormatted("Web_hook_callback called")
     if request.args.get('validationToken') != None:
         return request.args.get('validationToken'),200
     data=request.get_json()
