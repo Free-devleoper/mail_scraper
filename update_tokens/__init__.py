@@ -104,25 +104,20 @@ def get_all_users():
     return users
 def update_access_token():
     users=get_all_users()
-    def updates(**kwargs):
-        users=kwargs.get("users",{})
-        print(users)
-        if not users:
-            return "No Users",200
-        else:
-            for i,user in enumerate(users):
-                tokens=refresh_token(user)
-                user["refresh_token"]=tokens["refresh_token"]
-                user["access_token"]=tokens["access_token"]
-                set_current_user(tokens)
-                update_user(user)
-                sub=renew_subscription(user)
-                user["subscription_id"]=sub["id"]
-                user["subscription_expiry_date"]=sub["expirationDateTime"]
-                update_user_subscription(user)
-            return "Updated"
-    thread = threading.Thread(target=updates,kwargs={'users': users})
-    thread.start()
+    print(users)
+    if not users:
+        return "No Users",200
+    else:
+        for i,user in enumerate(users):
+            tokens=refresh_token(user)
+            user["refresh_token"]=tokens["refresh_token"]
+            user["access_token"]=tokens["access_token"]
+            set_current_user(tokens)
+            update_user(user)
+            sub=renew_subscription(user)
+            user["subscription_id"]=sub["id"]
+            user["subscription_expiry_date"]=sub["expirationDateTime"]
+            update_user_subscription(user)
     return jsonify({"status":"Success"}),200   
 def create_user_in_table(user_details,tokens):
     user={
