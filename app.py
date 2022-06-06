@@ -409,6 +409,9 @@ def unsubscribe():
             user["subscribed"]=0
             user["subscription_expiry_date"]=''
             update_user_subscription(user)
+            t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
+            table_client = t_client.get_table_client(table_name="mailscraperapi")
+            table_client.delete_entity(row_key=user["RowKey"],partition_key=user["PartitionKey"])
             return "SuccessFuly Unsubscribed",200
         else:
             return "User is not subscribed",400
