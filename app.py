@@ -310,19 +310,10 @@ def web_hook_callback():
         set_current_user(tokens)
         logger.debug("updating user")                    
         update_user(user)
-        logger.debug("Saving message...")
-        logger.debug("First part of save_email")
-        logger.debug("PartitionKey="+str(message["id"]))
-        logger.debug("RowKey="+str(user["RowKey"]))
-        logger.debug("From="+str(message["from"]["emailAddress"]["address"]))
-        logger.debug("Sent_date_time="+str(message["sentDateTime"]))
-        logger.debug("Subject="+str(message["subject"]))
-        logger.debug("content="+str(message["body"]["content"]))        
+        message=get_message(res_data[3])
         save_email(user,message)
-        logger.debug("Message saved")
-        
+
         if user["status"] == 200:
-            message=get_message(res_data[3])
             if message["from"]["emailAddress"]["address"] == "adjutor@aisafety.com":
                 print("Message is from Adjutor. (print)")
                 logger.debug("Message is from Adjutor (logger.debug)")
