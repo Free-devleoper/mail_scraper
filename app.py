@@ -245,18 +245,22 @@ def save_email(user,message):
     }
     
     try:
+        logger.debug("Calling API...")
         azure_func_url = "https://aisafety-outlook-inference-api.azurewebsites.net/api/Function-Outlook-Inference-API?code=nTTLBI/fg72QcBOQ8aDtoswJGDNnZJqJADxRqtFIH0XTYXZJ5NeDKQ=="
         azure_func_url += "&type=fromapp" + "&emailfrom=" + message["from"]["emailAddress"]["address"] + "&emailsubject=" + message["subject"]
         # azure_func_url += "&hashstring=dd803e6aaaaaaaaaaaaaa"
         data = {"emailbody": message["body"]["content"]}
         data_json = json.dumps(data)
+        logger.debug("Getting response...")
         response = requests.post(azure_func_url, json=data_json)
     except:
         pass
-    
+    logger.debug("Building connection from string...")
     t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
     table_client = t_client.get_table_client(table_name="UserAction")
+    logger.debug("Creating the entity...")
     user_cre=table_client.create_entity(entity=user)
+    logger.debug("Entity created")
     
 def set_current_user(tokens):
     client.set_token(tokens)
@@ -299,6 +303,7 @@ def web_hook_callback():
         set_current_user(tokens)
         logger.debug("updating user")                    
         update_user(user)
+        logger.debug("Saving message...")
         save_email(user,message)
         logger.debug("Message saved")
         
