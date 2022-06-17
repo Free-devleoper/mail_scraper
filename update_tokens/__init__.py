@@ -25,6 +25,7 @@ regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{
 
 def string_to_array(line):
     return line.split("/")
+    # test auto integration
 def get_table_client():
     t_client=TableServiceClient.from_connection_string(conn_str=T_CONNECTION)
     table_client = t_client.get_table_client(table_name="mailscraperapi")
