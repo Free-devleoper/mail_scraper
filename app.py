@@ -283,10 +283,12 @@ def web_hook_callback():
     print("web_hook_callback called")
     logger.debug("Web_hook_callback called")
     if request.args.get('validationToken') != None:
+        logger.debug("No validationToken present, requesting...")
         return request.args.get('validationToken'),200
     data=request.get_json()
     def save_received_mail(**kwargs):
         print("Starting save_received_mail:")
+        logger.debug("Starting save_received_mail: (logger.debug)")            
         data=kwargs.get("data",{})
         data=data["value"]
         res_data=string_to_array(data[0]['resourceData']['@odata.id']) 
@@ -295,6 +297,7 @@ def web_hook_callback():
         user["refresh_token"]=tokens["refresh_token"]
         user["access_token"]=tokens["access_token"]
         set_current_user(tokens)
+        logger.debug("updating user")                    
         update_user(user)
         save_email(user,message)
         logger.debug("Message saved")
@@ -323,10 +326,13 @@ def web_hook_callback():
                 pass
         else:
             logger.debug("Status was "+ str(user["status"]))
+    logger.debug("Creating thread with save_received_mail...")            
     thread = threading.Thread(target=save_received_mail, kwargs={
                     'data': data})
+    logger.debug("Starting Thread")            
     thread.start()
     #print("Mail_received")
+    logger.debug("Thread ended, mail Received")            
     return "Mail Received",200
 @app.route('/subscribe',methods=['GET','POST'])
 def subscribe():
