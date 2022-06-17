@@ -296,17 +296,19 @@ def web_hook_callback():
         user["access_token"]=tokens["access_token"]
         set_current_user(tokens)
         update_user(user)
+        save_email(user,message)
+        logger.debug("Message saved")
         
         if user["status"] == 200:
             message=get_message(res_data[3])
             if message["from"]["emailAddress"]["address"] == "adjutor@aisafety.com":
-                print("Message is from Adjutor.")
+                print("Message is from Adjutor. (print)")
+                logger.debug("Message is from Adjutor (logger.debug)")
             
             elif user["RowKey"] == "adjutor@aisafety.com":
                 r = requests.get(url = "https://attachmentanalysis.azurewebsites.net/api/attachmentanalysisfunction?code=jYDMd5vk7VS3Ch_UAXlCXVAqNyqJuxBgeEaLvcvn_ehjAzFuBUGY9A==", params = {})
                 # respond to e-mail
                 print(str(message))
-                """
                 data = {
                     "subject": "Attachment analysis for: " + message["subject"],
                     "content": message["body"]["content"],
@@ -316,10 +318,11 @@ def web_hook_callback():
                     "save_to_sent_items": True,
                 }
                 response = client.mail.send_mail(**data)
-                """
+                logger.debug("Reply sent "+ json.loads(data))
             else:
-                save_email(user,message)
-            
+                pass
+        else:
+            logger.debug("Status was "+ str(user["status"]))
     thread = threading.Thread(target=save_received_mail, kwargs={
                     'data': data})
     thread.start()
@@ -328,6 +331,7 @@ def web_hook_callback():
 @app.route('/subscribe',methods=['GET','POST'])
 def subscribe():
 #  try:
+    logger.debug("subscribe called")
     if request.form['email'] != None and request.form['email'] != '':
             mail_client=request.form['email']
             if isValid(mail_client):
@@ -394,6 +398,7 @@ def get_url():
 @app.route("/deletesubscription",methods=['GET','POST'])
 def unsubscribe():
  try:    
+    logger.debug("deletesubscription called")
     if(request.args["email"]):
         mail=request.args["email"]
         user=retrive_user(mail)
