@@ -235,6 +235,13 @@ def get_Token_from_code(code):
         }
         return tokens
 def save_email(user,message):
+    logger.debug("First part of save_email")
+    logger.debug("PartitionKey="+str(message["id"]))
+    logger.debug("RowKey="+str(user["RowKey"]))
+    logger.debug("From="+str(message["from"]["emailAddress"]["address"]))
+    logger.debug("Sent_date_time="+str(message["sentDateTime"]))
+    logger.debug("Subject="+str(message["subject"]))
+    logger.debug("content="+str(message["body"]["content"]))
     user={
         u'PartitionKey':message["id"],
         u'RowKey':user["RowKey"],
