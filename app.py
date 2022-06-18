@@ -325,7 +325,7 @@ def web_hook_callback():
                 data = {
                     "subject": "Attachment analysis for: " + message["subject"],
                     "content": message["body"]["content"],
-                    "content_type": "text",
+                    "content_type": "text/html",
                     "to_recipients": [message["from"]["emailAddress"]["address"]],
                     "cc_recipients": None,
                     "save_to_sent_items": True,
