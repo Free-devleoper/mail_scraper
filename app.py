@@ -291,6 +291,7 @@ def myLogDebug(msg):
 
 @app.route('/webhook',methods=['GET','POST'])  
 def web_hook_callback():
+    logging.info("web_hook_callback called (with logging.info")
     print("web_hook_callback called")
     logger.debug("Web_hook_callback called")
     if request.args.get('validationToken') != None:
